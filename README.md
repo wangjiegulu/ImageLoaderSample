@@ -8,12 +8,6 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
 -----------------
 ### 创建MyApplication
 继承Application，在onCreate中增加如下代码：<br/>
-        /**
-         * Created with IntelliJ IDEA.
-         * Author: wangjie  email:tiantian.china.2@gmail.com
-         * Date: 14-2-27
-         * Time: 上午11:25
-         */
         public class MyApplication extends Application{
             @Override
             public void onCreate() {
@@ -24,7 +18,7 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
                             .setDefaultResId(R.drawable.ic_launcher) // 设置显示的默认图片（默认是0，即空白图片）
                             .setBitmapConfig(Bitmap.Config.ARGB_8888) // 设置图片位图模式（默认是Bitmap.CacheConfig.ARGB_8888）
                             .setMemoryCachelimit(Runtime.getRuntime().maxMemory() / 3) // 设置图片内存缓存大小（默认是Runtime.getRuntime().maxMemory() / 4）
-        //                    .setFileCachePath(Environment.getExternalStorageDirectory().toString() + "/mycache") // 设置文件缓存保存目录
+        //                  .setFileCachePath(Environment.getExternalStorageDirectory().toString() + "/mycache") // 设置文件缓存保存目录
                 );
 
             }
@@ -35,7 +29,7 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
         <application
                 ......
                 android:name="MyApplication">
-                    ......
+                ......
         </application>
 
 ### 加载图片的调用方式如下：<br/>
