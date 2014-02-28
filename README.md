@@ -6,8 +6,8 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
 
 初始化配置
 -----------------
-###
-创建MyApplication，继承Application，在onCreate中增加如下代码：
+### 创建MyApplication
+继承Application，在onCreate中增加如下代码：<br/>
         /**
          * Created with IntelliJ IDEA.
          * Author: wangjie  email:tiantian.china.2@gmail.com
@@ -28,16 +28,17 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
                 );
 
             }
-
-    然后再AndroidManifest.xml中添加：
+            ......
+        }
+<br/>
+然后再AndroidManifest.xml中添加：<br/>
         <application
                 ......
                 android:name="MyApplication">
                     ......
         </application>
 
-###
-加载图片的调用方式如下：
+### 加载图片的调用方式如下：<br/>
         holder.progress.setText("0%");
         holder.progress.setVisibility(View.VISIBLE);
         final ViewHolder vhr = holder;
