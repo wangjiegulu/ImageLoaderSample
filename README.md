@@ -4,8 +4,10 @@ ImageLoaderSample
 android端用于异步加载图片，内存缓存，文件缓存，imageview显示图片时增加淡入淡出动画。
 
 
-### 初始化配置
-    创建MyApplication，继承Application，在onCreate中增加如下代码：
+初始化配置
+-----------------
+###
+创建MyApplication，继承Application，在onCreate中增加如下代码：
         /**
          * Created with IntelliJ IDEA.
          * Author: wangjie  email:tiantian.china.2@gmail.com
@@ -34,7 +36,8 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
                     ......
         </application>
 
-    加载图片的调用方式如下：
+###
+加载图片的调用方式如下：
         holder.progress.setText("0%");
         holder.progress.setVisibility(View.VISIBLE);
         final ViewHolder vhr = holder;
@@ -54,13 +57,11 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
         或者
         ImageLoader.getInstances().displayImage(url, imageIv, 100);
 
-###
-> 例子中，用到了一部分注解（与ImageLoader功能无关，但是可以简化代码的编写）
->
-> 可以点下面图片进入AndroidInject
->
-> [![image]](https://github.com/wangjiegulu/androidInject)
-> [image]: http://github.com/github.png "androidInject"
+备注
+------------
+例子中，用到了一部分注解（与ImageLoader功能无关，但是可以简化代码的编写）
+可以点下面连接进入AndroidInject
+[AndroidInject](https://github.com/wangjiegulu/androidInject)<br />
 
 
 
