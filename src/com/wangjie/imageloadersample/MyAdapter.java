@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.wangjie.imageloadersample.customviews.FadeImageView;
 import com.wangjie.imageloadersample.imageloader.ImageLoader;
 
 import java.util.List;

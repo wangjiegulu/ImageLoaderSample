@@ -1,4 +1,4 @@
-package com.wangjie.imageloadersample;
+package com.wangjie.imageloadersample.customviews;
 
 import android.content.Context;
 import android.graphics.Bitmap;

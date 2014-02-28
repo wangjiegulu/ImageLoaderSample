@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.widget.ImageView;
-import com.wangjie.imageloadersample.FadeImageView;
+import com.wangjie.imageloadersample.customviews.FadeImageView;
 
 import java.io.*;
 import java.net.HttpURLConnection;
