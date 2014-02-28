@@ -7,6 +7,12 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
 初始化配置
 -----------------
 ### 创建MyApplication 继承Application，在onCreate中增加如下代码：<br/>
+            /**
+             * Created with IntelliJ IDEA.
+             * Author: wangjie  email:tiantian.china.2@gmail.com
+             * Date: 14-2-27
+             * Time: 上午11:25
+             */
             public class MyApplication extends Application{
             @Override
             public void onCreate() {
