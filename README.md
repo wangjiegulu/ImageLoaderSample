@@ -6,9 +6,8 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
 
 初始化配置
 -----------------
-### 创建MyApplication
-继承Application，在onCreate中增加如下代码：<br/>
-        public class MyApplication extends Application{
+### 创建MyApplication 继承Application，在onCreate中增加如下代码：<br/>
+            public class MyApplication extends Application{
             @Override
             public void onCreate() {
                 super.onCreate();
@@ -25,7 +24,7 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
             ......
         }
 <br/>
-然后再AndroidManifest.xml中添加：<br/>
+###然后再AndroidManifest.xml中添加：<br/>
         <application
                 ......
                 android:name="MyApplication">
