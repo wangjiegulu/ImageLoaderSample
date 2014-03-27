@@ -15,7 +15,7 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
              * Date: 14-2-27
              * Time: 上午11:25
              */
-            public class MyApplication extends Application{
+            public class MyApplication extends ABApplication{
 
             @Override
                 protected void initImageLoader() {
