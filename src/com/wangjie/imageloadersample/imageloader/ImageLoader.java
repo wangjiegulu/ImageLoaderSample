@@ -8,6 +8,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.widget.ImageView;
+import com.wangjie.androidbucket.log.Logger;
+import com.wangjie.androidbucket.thread.Runtask;
+import com.wangjie.androidbucket.thread.ThreadPool;
 import com.wangjie.imageloadersample.customviews.FadeImageView;
 
 import java.io.*;
@@ -54,7 +57,7 @@ public class ImageLoader {
     private Map<ImageView, String> imageViews = Collections
             .synchronizedMap(new WeakHashMap<ImageView, String>()); // 为每个imageview设置对应的url
     // 线程池
-    ExecutorService executorService;
+//    ExecutorService executorService;
 
     /*******************************配置信息BEGIN*******************************/
     // applicationContext
@@ -67,9 +70,9 @@ public class ImageLoader {
 
     /*******************************配置信息END*******************************/
 
-    private ImageLoader() {
-        executorService = Executors.newFixedThreadPool(5);
-    }
+//    private ImageLoader() {
+//        executorService = Executors.newFixedThreadPool(5);
+//    }
 
     /**
      * 初始化方法（初始化各种缓存配置），推荐在Application中调用
@@ -146,7 +149,9 @@ public class ImageLoader {
      */
     private void queuePhoto(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener) {
         PhotoToLoad p = new PhotoToLoad(url, imageView, listener);
-        executorService.submit(new PhotosLoader(p, requiredSize));
+//        executorService.submit(new PhotosLoader(p, requiredSize));
+        ThreadPool.go(new PhotosLoader(p, requiredSize));
+
     }
 
     /**
@@ -273,24 +278,23 @@ public class ImageLoader {
     /**
      * 异步加载图片
      */
-    class PhotosLoader implements Runnable {
-        PhotoToLoad photoToLoad;
-        int requiredSize;
-
-        PhotosLoader(PhotoToLoad photoToLoad, int requiredSize) {
-            this.photoToLoad = photoToLoad;
-            this.requiredSize = requiredSize;
+    class PhotosLoader extends Runtask{
+        PhotosLoader(Object... objs) {
+            super(objs);
         }
 
         @Override
-        public void run() {
+        public Object runInBackground() {
+            PhotoToLoad photoToLoad = (PhotoToLoad)objs[0];
+            int requiredSize = (Integer)objs[1];
+
             if (imageViewReused(photoToLoad)){ // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
-                return;
+                return null;
             }
             Bitmap bmp = getBitmap(photoToLoad.url, requiredSize, photoToLoad); // 网络加载图片
             memoryCache.put(photoToLoad.url, bmp);
             if (imageViewReused(photoToLoad)){ // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
-                return;
+                return null;
             }
 
             // 加载结束，更新UI
@@ -300,6 +304,7 @@ public class ImageLoader {
             msg.obj = photoToLoad;
             rHandler.sendMessage(msg);
 
+            return null;
         }
     }
 

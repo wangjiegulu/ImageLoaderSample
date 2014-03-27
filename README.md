@@ -3,6 +3,8 @@ ImageLoaderSample
 
 android端用于异步加载图片，内存缓存，文件缓存，imageview显示图片时增加淡入淡出动画。
 
+### 注意：
+        需要添加(LibraryAndroidBucket)[https://github.com/wangjiegulu/AndroidBucket]项目的支持（日志、线程、util等）的依赖，ImageLoader使用的ThreadPool，修改配置文件代码
 
 初始化配置
 -----------------
@@ -14,19 +16,18 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
              * Time: 上午11:25
              */
             public class MyApplication extends Application{
-            @Override
-            public void onCreate() {
-                super.onCreate();
-                ImageLoader.init(getApplicationContext(),
-                        new CacheConfig()
-                            .setDefRequiredSize(600) // 设置默认的加载图片尺寸（表示宽高任一不超过该值，默认是70px）
-                            .setDefaultResId(R.drawable.ic_launcher) // 设置显示的默认图片（默认是0，即空白图片）
-                            .setBitmapConfig(Bitmap.Config.ARGB_8888) // 设置图片位图模式（默认是Bitmap.CacheConfig.ARGB_8888）
-                            .setMemoryCachelimit(Runtime.getRuntime().maxMemory() / 3) // 设置图片内存缓存大小（默认是Runtime.getRuntime().maxMemory() / 4）
-        //                  .setFileCachePath(Environment.getExternalStorageDirectory().toString() + "/mycache") // 设置文件缓存保存目录
-                );
 
-            }
+            @Override
+                protected void initImageLoader() {
+                    ImageLoader.init(getApplicationContext(),
+                            new CacheConfig()
+                                    .setDefRequiredSize(600) // 设置默认的加载图片尺寸（表示宽高任一不超过该值，默认是70px）
+                                    .setDefaultResId(R.drawable.ic_launcher) // 设置显示的默认图片（默认是0，即空白图片）
+                                    .setBitmapConfig(Bitmap.Config.ARGB_8888) // 设置图片位图模式（默认是Bitmap.CacheConfig.ARGB_8888）
+                                    .setMemoryCachelimit(Runtime.getRuntime().maxMemory() / 3) // 设置图片内存缓存大小（默认是Runtime.getRuntime().maxMemory() / 4）
+            //                    .setFileCachePath(Environment.getExternalStorageDirectory().toString() + "/mycache") // 设置文件缓存保存目录
+                    );
+                }
             ......
         }
 <br/>
