@@ -4,7 +4,7 @@ ImageLoaderSample
 android端用于异步加载图片，内存缓存，文件缓存，imageview显示图片时增加淡入淡出动画。
 
 ### 注意：
-        需要添加(LibraryAndroidBucket)[https://github.com/wangjiegulu/AndroidBucket]项目的支持（日志、线程、util等）的依赖，ImageLoader使用的ThreadPool，修改配置文件代码
+需要添加[LibraryAndroidBucket](https://github.com/wangjiegulu/AndroidBucket)项目的支持（日志、线程、util等）的依赖，ImageLoader使用的ThreadPool，修改配置文件代码
 
 初始化配置
 -----------------
