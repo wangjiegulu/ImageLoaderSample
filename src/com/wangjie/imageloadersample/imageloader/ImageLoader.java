@@ -19,8 +19,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author wangjie email:tiantian.china.2@gmail.com
@@ -52,8 +50,8 @@ public class ImageLoader {
 
     private static ImageLoader imageLoader;
 
-    MemoryCache memoryCache; // 内存缓存
-    FileCache fileCache; // 文件缓存
+    public MemoryCache memoryCache; // 内存缓存
+    public FileCache fileCache; // 文件缓存
     private Map<ImageView, String> imageViews = Collections
             .synchronizedMap(new WeakHashMap<ImageView, String>()); // 为每个imageview设置对应的url
     // 线程池
@@ -112,7 +110,7 @@ public class ImageLoader {
      * @param imageView
      * @param requiredSize 裁剪图片大小尺寸（一直裁剪到图片宽或高 至少有一个小与requiredSize的时候）
      */
-    public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener) {
+    public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId) {
         imageViews.put(imageView, url);
         // 先从内存缓存中查找
         Bitmap bitmap = memoryCache.get(url);
@@ -123,21 +121,28 @@ public class ImageLoader {
             }
         } else {
             // 若没有的话则设置成默认图片，并开启新线程加载真实需要的图片
-            imageView.setImageResource(config.getDefaultResId());
+            if(defaultPicResId <= 0){
+                defaultPicResId = config.getDefaultResId();
+            }
+            imageView.setImageResource(defaultPicResId);
             queuePhoto(url, imageView, requiredSize, listener);
         }
     }
 
     public void displayImage(String url, ImageView imageView) {
-        displayImage(url, imageView, config.getDefRequiredSize(), null);
+        displayImage(url, imageView, config.getDefRequiredSize(), null, 0);
     }
 
     public void displayImage(String url, ImageView imageView, int requiredSize) {
-        displayImage(url, imageView, requiredSize, null);
+        displayImage(url, imageView, requiredSize, null, 0);
     }
 
     public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener) {
-        displayImage(url, imageView, config.getDefRequiredSize(), listener);
+        displayImage(url, imageView, config.getDefRequiredSize(), listener, 0);
+    }
+
+    public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener, int defaultPicResId) {
+        displayImage(url, imageView, config.getDefRequiredSize(), listener, defaultPicResId);
     }
 
     /**
@@ -206,7 +211,7 @@ public class ImageLoader {
             bitmap = decodeFile(f, requiredSize);
             return bitmap;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Logger.w(TAG, ex);
             return null;
         }
     }
@@ -362,8 +367,6 @@ public class ImageLoader {
                             photoToLoad.imageView.setImageBitmap(photoToLoad.bitmap);
                         }
 
-                    }else{
-                        photoToLoad.imageView.setImageResource(config.getDefaultResId());
                     }
                     // 如果设置了监听器
                     if(null != photoToLoad.onImageLoaderListener){
