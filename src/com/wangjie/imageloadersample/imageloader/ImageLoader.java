@@ -105,10 +105,11 @@ public class ImageLoader {
 
     /**
      * 最主要的方法
-     *
      * @param url
      * @param imageView
      * @param requiredSize 裁剪图片大小尺寸（一直裁剪到图片宽或高 至少有一个小与requiredSize的时候）
+     * @param listener
+     * @param defaultPicResId
      */
     public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId) {
         imageViews.put(imageView, url);
@@ -120,11 +121,20 @@ public class ImageLoader {
                 listener.onFinishedImageLoader(imageView, bitmap); // 通知完成加载
             }
         } else {
-            // 若没有的话则设置成默认图片，并开启新线程加载真实需要的图片
-            if(defaultPicResId <= 0){
+            // 如果defaultPicResId小于0，则不设置默认图片
+            if(defaultPicResId < 0){
+                queuePhoto(url, imageView, requiredSize, listener);
+                return;
+            }
+            /**
+             * 如果defaultPicResId等于0，则设置默认图片为config中的默认图片，并开启新线程加载真实需要的图片
+             * 如果defaultPicResId大于0，则设置默认图片为指定的默认图片，并开启新线程加载真实需要的图片
+             */
+            if(defaultPicResId == 0){
                 defaultPicResId = config.getDefaultResId();
             }
             imageView.setImageResource(defaultPicResId);
+
             queuePhoto(url, imageView, requiredSize, listener);
         }
     }
@@ -144,6 +154,8 @@ public class ImageLoader {
     public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener, int defaultPicResId) {
         displayImage(url, imageView, config.getDefRequiredSize(), listener, defaultPicResId);
     }
+
+
 
     /**
      * 启动线程加载图片
