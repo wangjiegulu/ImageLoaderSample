@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import com.wangjie.androidbucket.log.Logger;
 import com.wangjie.androidbucket.thread.Runtask;
 import com.wangjie.androidbucket.thread.ThreadPool;
+import com.wangjie.androidbucket.utils.ABIOUtil;
+import com.wangjie.androidbucket.utils.imageprocess.ABImageProcess;
 import com.wangjie.imageloadersample.customviews.FadeImageView;
 
 import java.io.*;
@@ -112,6 +114,8 @@ public class ImageLoader {
      * @param defaultPicResId
      */
     public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId) {
+//        String identityCode = url + "_" + requiredSize;
+        url = getIdentityCode(url, requiredSize);
         imageViews.put(imageView, url);
         // 先从内存缓存中查找
         Bitmap bitmap = memoryCache.get(url);
@@ -121,7 +125,9 @@ public class ImageLoader {
                 listener.onFinishedImageLoader(imageView, bitmap); // 通知完成加载
             }
         } else {
-            // 如果defaultPicResId小于0，则不设置默认图片
+            /**
+             * 如果defaultPicResId小于0，则不设置默认图片
+             */
             if(defaultPicResId < 0){
                 queuePhoto(url, imageView, requiredSize, listener);
                 return;
@@ -184,17 +190,29 @@ public class ImageLoader {
         if (b != null)
             return b;
 
-        // 最后从指定的url中下载图片
+        InputStream is = null;
+        OutputStream os = null;
         try {
+            os = new FileOutputStream(f);
+            String realUri = getUriFromIdentityCode(url);
+
+            // 如果是本地文件
+            if(!realUri.startsWith("http")){
+                Bitmap bm = ABImageProcess.getSmallBitmap(realUri, requiredSize, requiredSize);
+                bm.compress(Bitmap.CompressFormat.JPEG, 100, os);
+                return bm;
+            }
+
+            // 如果是网络图片，从指定的url中下载图片
             Bitmap bitmap = null;
-            URL imageUrl = new URL(url);
+            URL imageUrl = new URL(realUri);
             HttpURLConnection conn = (HttpURLConnection) imageUrl
                     .openConnection();
             conn.setConnectTimeout(30000);
             conn.setReadTimeout(30000);
             conn.setInstanceFollowRedirects(true);
-            InputStream is = conn.getInputStream();
-            OutputStream os = new FileOutputStream(f);
+            is = conn.getInputStream();
+
 //            CopyStream(is, os, conn.getContentLength(), photoToLoad);
 
             photoToLoad.totalSize = conn.getContentLength();
@@ -209,22 +227,22 @@ public class ImageLoader {
                 os.write(bytes, 0, count);
 
                 if(null != photoToLoad.onImageLoaderListener){ // 如果设置了图片加载监听，则回调
-                    Message msg = rHandler.obtainMessage();
+                    Message msg = loaderHandler.obtainMessage();
                     photoToLoad.currentSize += count;
                     msg.arg1 = IMAGE_LOADER_PROCESS;
                     msg.obj = photoToLoad;
-                    rHandler.sendMessage(msg);
+                    loaderHandler.sendMessage(msg);
                 }
 
             }
 
-            is.close();
-            os.close();
             bitmap = decodeFile(f, requiredSize);
             return bitmap;
         } catch (Exception ex) {
             Logger.w(TAG, ex);
             return null;
+        } finally {
+            ABIOUtil.closeIO(is, os);
         }
     }
 
@@ -309,6 +327,7 @@ public class ImageLoader {
                 return null;
             }
             Bitmap bmp = getBitmap(photoToLoad.url, requiredSize, photoToLoad); // 网络加载图片
+
             memoryCache.put(photoToLoad.url, bmp);
             if (imageViewReused(photoToLoad)){ // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
                 return null;
@@ -317,9 +336,9 @@ public class ImageLoader {
             // 加载结束，更新UI
             Message msg = rHandler.obtainMessage();
             msg.arg1 = IMAGE_LOADER_FINISHED;
-            photoToLoad.bitmap = bmp;
+//            photoToLoad.bitmap = bmp;
             msg.obj = photoToLoad;
-            rHandler.sendMessage(msg);
+            loaderHandler.sendMessage(msg);
 
             return null;
         }
@@ -333,9 +352,10 @@ public class ImageLoader {
      */
     boolean imageViewReused(PhotoToLoad photoToLoad) {
         String tag = imageViews.get(photoToLoad.imageView);
-        if (tag == null || !tag.equals(photoToLoad.url))
-            return true;
-        return false;
+//        if (tag == null || !tag.equals(photoToLoad.url))
+//            return true;
+//        return false;
+        return null == tag || !tag.equals(photoToLoad.url);
     }
 
 
@@ -357,12 +377,14 @@ public class ImageLoader {
     static final int IMAGE_LOADER_PROCESS = 0x01;
     static final int IMAGE_LOADER_FINISHED = 0x02;
 
-    Handler rHandler = new Handler(){
+    Handler loaderHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             PhotoToLoad photoToLoad = (PhotoToLoad)msg.obj;
-
+            if(null == photoToLoad){
+                return;
+            }
             switch(msg.arg1){
                 case IMAGE_LOADER_PROCESS: // 更新加载进度
                     photoToLoad.onImageLoaderListener.onProgressImageLoader(photoToLoad.imageView, photoToLoad.currentSize, photoToLoad.totalSize);
@@ -372,18 +394,18 @@ public class ImageLoader {
                     if (imageViewReused(photoToLoad)){ // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
                         return;
                     }
-                    if (null != photoToLoad.bitmap){
+                    Bitmap bitmap = memoryCache.get(photoToLoad.url);
+                    if (null != bitmap){
                         if(photoToLoad.imageView instanceof FadeImageView){
-                            ((FadeImageView)photoToLoad.imageView).setImageBitmapAnim(photoToLoad.bitmap);
+                            ((FadeImageView)photoToLoad.imageView).setImageBitmapAnim(bitmap);
                         }else{
-                            photoToLoad.imageView.setImageBitmap(photoToLoad.bitmap);
+                            photoToLoad.imageView.setImageBitmap(bitmap);
                         }
-
                     }
                     // 如果设置了监听器
                     if(null != photoToLoad.onImageLoaderListener){
                         // 通知观察者完成
-                        photoToLoad.onImageLoaderListener.onFinishedImageLoader(photoToLoad.imageView, photoToLoad.bitmap);
+                        photoToLoad.onImageLoaderListener.onFinishedImageLoader(photoToLoad.imageView, bitmap);
 
                     }
 
@@ -396,8 +418,15 @@ public class ImageLoader {
     };
 
 
-
-
-
+    private static final String DIVIDER = "_";
+    private String getIdentityCode(String uri, int requiredSize){
+        return uri + DIVIDER + requiredSize;
+    }
+    private String getUriFromIdentityCode(String indentityCode){
+        return indentityCode.substring(0, indentityCode.lastIndexOf(DIVIDER));
+    }
+    private int getRequiredSizeFromIdentityCode(String indentityCode){
+        return Integer.valueOf(indentityCode.substring(indentityCode.lastIndexOf(DIVIDER)));
+    }
 
 }
