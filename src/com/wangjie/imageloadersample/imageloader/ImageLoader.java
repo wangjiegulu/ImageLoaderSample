@@ -419,10 +419,10 @@ public class ImageLoader {
 
 
     private static final String DIVIDER = "_";
-    private String getIdentityCode(String uri, int requiredSize){
+    public static String getIdentityCode(String uri, int requiredSize){
         return uri + DIVIDER + requiredSize;
     }
-    private String getUriFromIdentityCode(String indentityCode){
+    public static String getUriFromIdentityCode(String indentityCode){
         return indentityCode.substring(0, indentityCode.lastIndexOf(DIVIDER));
     }
     private int getRequiredSizeFromIdentityCode(String indentityCode){
