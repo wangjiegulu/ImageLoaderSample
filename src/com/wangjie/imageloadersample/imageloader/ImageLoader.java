@@ -34,15 +34,18 @@ public class ImageLoader {
     public interface OnImageLoaderListener {
         /**
          * 用于在加载过程中回调更新UI进度
+         *
          * @param imageView
          * @param currentSize
          * @param totalSize
          */
         public void onProgressImageLoader(ImageView imageView, int currentSize, int totalSize);
+
         /**
          * 完成加载后回调
+         *
          * @param imageView 要加载ImageView
-         * @param bitmap 加载的图片
+         * @param bitmap    加载的图片
          */
         public void onFinishedImageLoader(ImageView imageView, Bitmap bitmap);
     }
@@ -59,7 +62,9 @@ public class ImageLoader {
     // 线程池
 //    ExecutorService executorService;
 
-    /*******************************配置信息BEGIN*******************************/
+    /**
+     * ****************************配置信息BEGIN******************************
+     */
     // applicationContext
     private Context context;
 
@@ -76,9 +81,10 @@ public class ImageLoader {
 
     /**
      * 初始化方法（初始化各种缓存配置），推荐在Application中调用
+     *
      * @param context
      */
-    public static void init(Context context, CacheConfig config){
+    public static void init(Context context, CacheConfig config) {
         imageLoader = new ImageLoader();
         imageLoader.context = context;
         /**
@@ -96,10 +102,11 @@ public class ImageLoader {
 
     /**
      * 获取ImageLoader实例
+     *
      * @return
      */
     public static ImageLoader getInstances() {
-        if(null == imageLoader){
+        if (null == imageLoader) {
             Log.e(TAG, "imageLoader had not be initialized");
         }
         return imageLoader;
@@ -107,28 +114,33 @@ public class ImageLoader {
 
     /**
      * 最主要的方法
+     *
      * @param url
      * @param imageView
-     * @param requiredSize 裁剪图片大小尺寸（一直裁剪到图片宽或高 至少有一个小与requiredSize的时候）
+     * @param requiredSize    裁剪图片大小尺寸（一直裁剪到图片宽或高 至少有一个小与requiredSize的时候）
      * @param listener
      * @param defaultPicResId
      */
-    public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId) {
+    public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId, boolean isOnlyMonmery) {
 //        String identityCode = url + "_" + requiredSize;
         url = getIdentityCode(url, requiredSize);
         imageViews.put(imageView, url);
         // 先从内存缓存中查找
         Bitmap bitmap = memoryCache.get(url);
-        if (bitmap != null){
+        if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
-            if(null != listener){
+            if (null != listener) {
                 listener.onFinishedImageLoader(imageView, bitmap); // 通知完成加载
             }
         } else {
+            if (isOnlyMonmery) { // 是否只是从内存中读取（保证显示速度）
+                imageView.setImageResource(defaultPicResId);
+                return;
+            }
             /**
              * 如果defaultPicResId小于0，则不设置默认图片
              */
-            if(defaultPicResId < 0){
+            if (defaultPicResId < 0) {
                 queuePhoto(url, imageView, requiredSize, listener);
                 return;
             }
@@ -136,7 +148,7 @@ public class ImageLoader {
              * 如果defaultPicResId等于0，则设置默认图片为config中的默认图片，并开启新线程加载真实需要的图片
              * 如果defaultPicResId大于0，则设置默认图片为指定的默认图片，并开启新线程加载真实需要的图片
              */
-            if(defaultPicResId == 0){
+            if (defaultPicResId == 0) {
                 defaultPicResId = config.getDefaultResId();
             }
             imageView.setImageResource(defaultPicResId);
@@ -144,27 +156,47 @@ public class ImageLoader {
             queuePhoto(url, imageView, requiredSize, listener);
         }
     }
+    public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId) {
+        displayImage(url, imageView, requiredSize, listener, defaultPicResId, false);
+    }
 
     public void displayImage(String url, ImageView imageView) {
-        displayImage(url, imageView, config.getDefRequiredSize(), null, 0);
+        displayImage(url, imageView, config.getDefRequiredSize(), null, 0, false);
     }
 
     public void displayImage(String url, ImageView imageView, int requiredSize) {
-        displayImage(url, imageView, requiredSize, null, 0);
+        displayImage(url, imageView, requiredSize, null, 0, false);
     }
 
     public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener) {
-        displayImage(url, imageView, config.getDefRequiredSize(), listener, 0);
+        displayImage(url, imageView, config.getDefRequiredSize(), listener, 0, false);
     }
 
     public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener, int defaultPicResId) {
-        displayImage(url, imageView, config.getDefRequiredSize(), listener, defaultPicResId);
+        displayImage(url, imageView, config.getDefRequiredSize(), listener, defaultPicResId, false);
     }
+
+    /************ 增加可以设置是否是从内存中读取的方法 ************/
+    public void displayImage(String url, ImageView imageView, boolean isOnlyMomery) {
+        displayImage(url, imageView, config.getDefRequiredSize(), null, 0, isOnlyMomery);
+    }
+    public void displayImage(String url, ImageView imageView, int requiredSize, boolean isOnlyMomery) {
+        displayImage(url, imageView, requiredSize, null, 0, isOnlyMomery);
+    }
+    public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener, boolean isOnlyMomery) {
+        displayImage(url, imageView, config.getDefRequiredSize(), listener, 0, isOnlyMomery);
+    }
+    public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener, int defaultPicResId, boolean isOnlyMomery) {
+        displayImage(url, imageView, config.getDefRequiredSize(), listener, defaultPicResId, isOnlyMomery);
+    }
+
+
 
 
 
     /**
      * 启动线程加载图片
+     *
      * @param url
      * @param imageView
      * @param requiredSize
@@ -179,6 +211,7 @@ public class ImageLoader {
 
     /**
      * 执行网络请求加载图片
+     *
      * @param url
      * @param requiredSize
      * @return
@@ -197,7 +230,7 @@ public class ImageLoader {
             String realUri = getUriFromIdentityCode(url);
 
             // 如果是本地文件
-            if(!realUri.startsWith("http")){
+            if (!realUri.startsWith("http")) {
                 Bitmap bm = ABImageProcess.getSmallBitmap(realUri, requiredSize, requiredSize);
                 bm.compress(Bitmap.CompressFormat.JPEG, 100, os);
                 return bm;
@@ -221,12 +254,12 @@ public class ImageLoader {
             for (; ; ) {
                 int count = is.read(bytes, 0, buffer_size);
 
-                if (count == -1){
+                if (count == -1) {
                     break;
                 }
                 os.write(bytes, 0, count);
 
-                if(null != photoToLoad.onImageLoaderListener){ // 如果设置了图片加载监听，则回调
+                if (null != photoToLoad.onImageLoaderListener) { // 如果设置了图片加载监听，则回调
                     Message msg = loaderHandler.obtainMessage();
                     photoToLoad.currentSize += count;
                     msg.arg1 = IMAGE_LOADER_PROCESS;
@@ -248,6 +281,7 @@ public class ImageLoader {
 
     /**
      * decode这个图片并且按比例缩放以减少内存消耗，虚拟机对每张图片的缓存大小也是有限制的
+     *
      * @param f
      * @param requiredSize
      * @return
@@ -270,7 +304,7 @@ public class ImageLoader {
 //                        width_tmp /= 2;
 //                        height_tmp /= 2;
 //                        scale *= 2;
-                if(width_tmp <= requiredSize || height_tmp <= requiredSize){
+                if (width_tmp <= requiredSize || height_tmp <= requiredSize) {
                     break;
                 }
                 width_tmp /= 2;
@@ -313,23 +347,23 @@ public class ImageLoader {
     /**
      * 异步加载图片
      */
-    class PhotosLoader extends Runtask{
+    class PhotosLoader extends Runtask {
         PhotosLoader(Object... objs) {
             super(objs);
         }
 
         @Override
         public Object runInBackground() {
-            PhotoToLoad photoToLoad = (PhotoToLoad)objs[0];
-            int requiredSize = (Integer)objs[1];
+            PhotoToLoad photoToLoad = (PhotoToLoad) objs[0];
+            int requiredSize = (Integer) objs[1];
 
-            if (imageViewReused(photoToLoad)){ // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
+            if (imageViewReused(photoToLoad)) { // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
                 return null;
             }
             Bitmap bmp = getBitmap(photoToLoad.url, requiredSize, photoToLoad); // 网络加载图片
 
             memoryCache.put(photoToLoad.url, bmp);
-            if (imageViewReused(photoToLoad)){ // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
+            if (imageViewReused(photoToLoad)) { // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
                 return null;
             }
 
@@ -366,9 +400,11 @@ public class ImageLoader {
         memoryCache.clear();
         fileCache.clear();
     }
+
     public void clearMemoryCache() {
         memoryCache.clear();
     }
+
     public void clearFileCache() {
         fileCache.clear();
     }
@@ -377,33 +413,33 @@ public class ImageLoader {
     static final int IMAGE_LOADER_PROCESS = 0x01;
     static final int IMAGE_LOADER_FINISHED = 0x02;
 
-    Handler loaderHandler = new Handler(){
+    Handler loaderHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            PhotoToLoad photoToLoad = (PhotoToLoad)msg.obj;
-            if(null == photoToLoad){
+            PhotoToLoad photoToLoad = (PhotoToLoad) msg.obj;
+            if (null == photoToLoad) {
                 return;
             }
-            switch(msg.arg1){
+            switch (msg.arg1) {
                 case IMAGE_LOADER_PROCESS: // 更新加载进度
                     photoToLoad.onImageLoaderListener.onProgressImageLoader(photoToLoad.imageView, photoToLoad.currentSize, photoToLoad.totalSize);
 
                     break;
                 case IMAGE_LOADER_FINISHED: // 加载完毕
-                    if (imageViewReused(photoToLoad)){ // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
+                    if (imageViewReused(photoToLoad)) { // 防止图片错位（如果加载的图片不是当前需要加载的图片，则不做任何处理）
                         return;
                     }
                     Bitmap bitmap = memoryCache.get(photoToLoad.url);
-                    if (null != bitmap){
-                        if(photoToLoad.imageView instanceof FadeImageView){
-                            ((FadeImageView)photoToLoad.imageView).setImageBitmapAnim(bitmap);
-                        }else{
+                    if (null != bitmap) {
+                        if (photoToLoad.imageView instanceof FadeImageView) {
+                            ((FadeImageView) photoToLoad.imageView).setImageBitmapAnim(bitmap);
+                        } else {
                             photoToLoad.imageView.setImageBitmap(bitmap);
                         }
                     }
                     // 如果设置了监听器
-                    if(null != photoToLoad.onImageLoaderListener){
+                    if (null != photoToLoad.onImageLoaderListener) {
                         // 通知观察者完成
                         photoToLoad.onImageLoaderListener.onFinishedImageLoader(photoToLoad.imageView, bitmap);
 
@@ -419,13 +455,16 @@ public class ImageLoader {
 
 
     private static final String DIVIDER = "_";
-    public static String getIdentityCode(String uri, int requiredSize){
+
+    public static String getIdentityCode(String uri, int requiredSize) {
         return uri + DIVIDER + requiredSize;
     }
-    public static String getUriFromIdentityCode(String indentityCode){
+
+    public static String getUriFromIdentityCode(String indentityCode) {
         return indentityCode.substring(0, indentityCode.lastIndexOf(DIVIDER));
     }
-    private int getRequiredSizeFromIdentityCode(String indentityCode){
+
+    private int getRequiredSizeFromIdentityCode(String indentityCode) {
         return Integer.valueOf(indentityCode.substring(indentityCode.lastIndexOf(DIVIDER)));
     }
 
