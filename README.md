@@ -68,7 +68,7 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
 License
 =======
 
-    Copyright 2015 Wang Jie
+    Copyright 2013 Wang Jie
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
