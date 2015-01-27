@@ -123,6 +123,9 @@ public class ImageLoader {
      */
     public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId, boolean isOnlyMonmery) {
 //        String identityCode = url + "_" + requiredSize;
+        if(null == url){
+            imageView.setImageResource(defaultPicResId);
+        }
         url = getIdentityCode(url, requiredSize);
         imageViews.put(imageView, url);
         // 先从内存缓存中查找
@@ -226,6 +229,10 @@ public class ImageLoader {
         InputStream is = null;
         OutputStream os = null;
         try {
+            if(f.exists() && f.isDirectory()){
+                f.delete();
+                f.createNewFile();
+            }
             os = new FileOutputStream(f);
             String realUri = getUriFromIdentityCode(url);
 
