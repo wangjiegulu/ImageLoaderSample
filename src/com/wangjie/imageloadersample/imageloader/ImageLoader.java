@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import com.wangjie.androidbucket.log.Logger;
 import com.wangjie.androidbucket.thread.Runtask;
 import com.wangjie.androidbucket.thread.ThreadPool;
+import com.wangjie.androidbucket.utils.ABFileUtil;
 import com.wangjie.androidbucket.utils.ABIOUtil;
 import com.wangjie.androidbucket.utils.imageprocess.ABImageProcess;
 import com.wangjie.imageloadersample.customviews.FadeImageView;
@@ -123,7 +124,7 @@ public class ImageLoader {
      */
     public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId, boolean isOnlyMonmery) {
 //        String identityCode = url + "_" + requiredSize;
-        if(null == url){
+        if (null == url) {
             imageView.setImageResource(defaultPicResId);
         }
         url = getIdentityCode(url, requiredSize);
@@ -159,6 +160,7 @@ public class ImageLoader {
             queuePhoto(url, imageView, requiredSize, listener);
         }
     }
+
     public void displayImage(String url, ImageView imageView, int requiredSize, OnImageLoaderListener listener, int defaultPicResId) {
         displayImage(url, imageView, requiredSize, listener, defaultPicResId, false);
     }
@@ -179,22 +181,24 @@ public class ImageLoader {
         displayImage(url, imageView, config.getDefRequiredSize(), listener, defaultPicResId, false);
     }
 
-    /************ 增加可以设置是否是从内存中读取的方法 ************/
+    /**
+     * ********* 增加可以设置是否是从内存中读取的方法 ***********
+     */
     public void displayImage(String url, ImageView imageView, boolean isOnlyMomery) {
         displayImage(url, imageView, config.getDefRequiredSize(), null, 0, isOnlyMomery);
     }
+
     public void displayImage(String url, ImageView imageView, int requiredSize, boolean isOnlyMomery) {
         displayImage(url, imageView, requiredSize, null, 0, isOnlyMomery);
     }
+
     public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener, boolean isOnlyMomery) {
         displayImage(url, imageView, config.getDefRequiredSize(), listener, 0, isOnlyMomery);
     }
+
     public void displayImage(String url, ImageView imageView, OnImageLoaderListener listener, int defaultPicResId, boolean isOnlyMomery) {
         displayImage(url, imageView, config.getDefRequiredSize(), listener, defaultPicResId, isOnlyMomery);
     }
-
-
-
 
 
     /**
@@ -229,10 +233,11 @@ public class ImageLoader {
         InputStream is = null;
         OutputStream os = null;
         try {
-            if(f.exists() && f.isDirectory()){
+            if (f.exists() && f.isDirectory()) {
                 f.delete();
                 f.createNewFile();
             }
+            ABFileUtil.getFileAutoCreated(f.getAbsolutePath());
             os = new FileOutputStream(f);
             String realUri = getUriFromIdentityCode(url);
 
