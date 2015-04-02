@@ -1,0 +1,9 @@
+include ':AndroidBucket'
+//include ':AndroidInject'
+
+//project(":AndroidBucket").projectDir = new File(settingsDir, "../AndroidBucket");
+//project(":AndroidInject").projectDir = new File(settingsDir, "../androidInject");
+
+Properties props = new Properties()
+props.load(new FileInputStream("local.properties"))
+project(":AndroidBucket").projectDir = new File(settingsDir, props.getProperty("AndroidBucket"));
