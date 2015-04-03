@@ -6,6 +6,15 @@ android端用于异步加载图片，内存缓存，文件缓存，imageview显�
 ### 注意：
 需要添加Library[AndroidBucket](https://github.com/wangjiegulu/AndroidBucket)项目的支持（日志、线程、util等）的依赖，ImageLoader使用的ThreadPool，修改配置文件代码
 
+###Gradle
+            compile 'com.github.wangjiegulu:ImageLoaderSample:1.0.1'
+###Maven
+            <dependency>
+                <groupId>com.github.wangjiegulu</groupId>
+                <artifactId>ImageLoaderSample</artifactId>
+                <version>1.0.1</version>
+            </dependency>
+
 初始化配置
 -----------------
 ### 创建MyApplication 继承Application，在onCreate中增加如下代码：<br/>
